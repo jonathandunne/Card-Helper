@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function LoginScreen() {
-  const { signInWithEmail, signInWithProvider } = useAuth();
+  const { signInWithEmail } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,6 +15,17 @@ export default function LoginScreen() {
   async function onEmailLogin() {
     setLoading(true);
     setError(null);
+    // Basic validation: require email and password
+    if (!email || !email.trim()) {
+      setError('Email is required');
+      setLoading(false);
+      return;
+    }
+    if (!password) {
+      setError('Password is required');
+      setLoading(false);
+      return;
+    }
     try {
       const res = await signInWithEmail(email, password, remember);
       if (res.error) setError(res.error.message || 'Login failed');
@@ -26,13 +37,7 @@ export default function LoginScreen() {
     }
   }
 
-  async function onOAuth(provider: 'google' | 'apple') {
-    try {
-      await signInWithProvider(provider);
-    } catch (e: any) {
-      setError(e?.message || String(e));
-    }
-  }
+  
 
   return (
     <View style={styles.container}>
@@ -45,11 +50,7 @@ export default function LoginScreen() {
           <Text>{remember ? '☑' : '☐'} Remember password</Text>
         </TouchableOpacity>
       </View>
-      <Button title={loading ? 'Signing in...' : 'Sign in with Email'} onPress={onEmailLogin} disabled={loading} />
-      <View style={{ height: 12 }} />
-      <Button title="Sign in with Google" onPress={() => onOAuth('google')} />
-      <View style={{ height: 8 }} />
-      <Button title="Sign in with Apple" onPress={() => onOAuth('apple')} />
+      <Button title={loading ? 'Signing in...' : 'Sign in'} onPress={onEmailLogin} disabled={loading} />
       <View style={{ height: 12 }} />
       <Button title="Create account" onPress={() => router.push('./signup')} />
     </View>

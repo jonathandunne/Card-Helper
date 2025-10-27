@@ -14,6 +14,22 @@ export default function SignUpScreen() {
   async function onSignUp() {
     setLoading(true);
     setError(null);
+    // Basic validation
+    if (!email || !email.trim()) {
+      setError('Email is required');
+      setLoading(false);
+      return;
+    }
+    if (!password) {
+      setError('Password is required');
+      setLoading(false);
+      return;
+    }
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      setLoading(false);
+      return;
+    }
     try {
       const res = await signUpWithEmail(email, password);
       if (res.error) {
