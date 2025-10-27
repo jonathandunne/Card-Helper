@@ -1,6 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { getSecureValue, saveSecureValue, deleteSecureValue, hashPasscode } from '../lib/secure';
+import { isSupabaseConfigured } from '../lib/env';
 
 type User = any;
 
@@ -69,11 +70,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   async function signUpWithEmail(email: string, password: string) {
+    if (!isSupabaseConfigured()) {
+      return { error: { message: 'Supabase not configured. Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_KEY.' } };
+    }
     const res = await supabase.auth.signUp({ email, password });
     return res;
   }
 
   async function signInWithEmail(email: string, password: string, remember = false) {
+    if (!isSupabaseConfigured()) {
+      return { error: { message: 'Supabase not configured. Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_KEY.' } };
+    }
     const res = await supabase.auth.signInWithPassword({ email, password });
     if (remember && res.data.session?.access_token) {
       // store access token (short-lived) and hashed passcode as fallback

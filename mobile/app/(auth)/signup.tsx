@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
+import { isSupabaseConfigured } from '../../lib/env';
 
 export default function SignUpScreen() {
   const { signUpWithEmail } = useAuth();
@@ -47,11 +48,16 @@ export default function SignUpScreen() {
 
   return (
     <View style={styles.container}>
+      {!isSupabaseConfigured() ? (
+        <Text style={{ color: 'orange', marginBottom: 12 }}>
+          Supabase not configured. Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_KEY in your environment.
+        </Text>
+      ) : null}
       <Text style={styles.title}>Create account</Text>
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <TextInput placeholder="Email" value={email} onChangeText={setEmail} style={styles.input} autoCapitalize="none" />
       <TextInput placeholder="Password" value={password} onChangeText={setPassword} style={styles.input} secureTextEntry />
-      <Button title={loading ? 'Creating account...' : 'Create account'} onPress={onSignUp} disabled={loading} />
+      <Button title={loading ? 'Creating account...' : 'Create account'} onPress={onSignUp} disabled={loading || !isSupabaseConfigured()} />
       <View style={{ height: 12 }} />
       <Button title="Back to Sign in" onPress={() => router.replace('/(auth)/login')} />
     </View>
