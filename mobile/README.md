@@ -48,3 +48,24 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Project DB assumptions (cards & rewards)
+
+This app expects the following shape for card metadata in the `cards` table:
+
+- `cards` rows contain a JSON/JSONB `metadata` column. The app looks for a `rewards` object inside that metadata, for example:
+
+```json
+{
+   "rewards": {
+      "groceries": 4.0,
+      "dining": 3.0,
+      "travel": 2.0
+   }
+}
+```
+
+- The `user_cards` table maps users to available card records. Use `lib/cards.ts` for the exact queries the app runs.
+- The Purchase screen sorts the user's cards by `metadata.rewards[category]` (higher numeric value = better rewards). Cards with no value for the chosen category are treated as 0.
+
+If you'd rather store reward rates in a dedicated table (e.g. `card_rewards(card_id, category, rate)`), the app logic can be adjusted — tell me and I can add the corresponding queries and migrations.

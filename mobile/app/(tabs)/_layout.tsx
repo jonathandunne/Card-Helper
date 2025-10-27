@@ -23,17 +23,21 @@ export default function TabLayout() {
 
   return (
     <Tabs
-      screenOptions={{
+      // cast to any so we can pass through header options that the bottom tabs typing
+      // doesn't include but which are respected by the underlying header implementation.
+      screenOptions={( {
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         // Show header for every tab and add a sign-out button on the right
         headerShown: true,
+        // hide the default back button title (prevents folder names like "(tabs)" from appearing)
+        headerBackTitleVisible: false,
         headerRight: () => (
           <TouchableOpacity onPress={handleSignOut} style={{ paddingHorizontal: 12 }}>
             <Text style={{ color: Colors[colorScheme ?? 'light'].tint }}>Sign out</Text>
           </TouchableOpacity>
         ),
         tabBarButton: HapticTab,
-      }}>
+      } as any)}>
       <Tabs.Screen
         name="index"
         options={{
@@ -46,6 +50,13 @@ export default function TabLayout() {
         options={{
           title: 'Explore',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="purchase"
+        options={{
+          title: 'Purchase',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="cart.fill" color={color} />,
         }}
       />
       <Tabs.Screen
