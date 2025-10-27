@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
+import { useFocusEffect } from '@react-navigation/native';
 
 // Purchase categories supported by the UI. The app expects card metadata to include
 // a `rewards` object mapping category keys to numeric reward rates (higher is better).
@@ -25,11 +26,17 @@ export default function PurchaseScreen() {
   const [userCards, setUserCards] = useState<CardsLib.UserCardRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('groceries');
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
   useEffect(() => {
     if (!authLoading) fetchUserCards();
   }, [authLoading]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!authLoading && user) fetchUserCards();
+    }, [authLoading, user])
+  );
 
   async function fetchUserCards() {
     setLoading(true);

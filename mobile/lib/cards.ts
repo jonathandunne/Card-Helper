@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from './supabaseClient';
 
 export type Card = {
@@ -14,27 +15,110 @@ export type UserCardRow = {
   created_at?: string;
 };
 
+// Static list of available cards
+const STATIC_CARDS: Card[] = [
+  {
+    id: 'discover-student-cash-back',
+    name: 'Discover it® Student Cash Back',
+    brand: 'Discover',
+    metadata: {
+      rewards: { groceries: 1, dining: 1, travel: 1, gas: 1, streaming: 1, other: 1 }
+    }
+  },
+  {
+    id: 'capital-one-savor-student',
+    name: 'Capital One Savor Student Cash Rewards',
+    brand: 'Capital One',
+    metadata: {
+      rewards: { groceries: 3, dining: 3, travel: 1, gas: 1, streaming: 3, other: 1 }
+    }
+  },
+  {
+    id: 'capital-one-quicksilver-student',
+    name: 'Capital One Quicksilver Student Cash Rewards',
+    brand: 'Capital One',
+    metadata: {
+      rewards: { groceries: 1.5, dining: 1.5, travel: 1.5, gas: 1.5, streaming: 1.5, other: 1.5 }
+    }
+  },
+  {
+    id: 'boa-customized-student',
+    name: 'Bank of America® Customized Cash Rewards for Students',
+    brand: 'Bank of America',
+    metadata: {
+      rewards: { groceries: 3, dining: 3, travel: 3, gas: 3, streaming: 3, other: 1 }
+    }
+  },
+  {
+    id: 'boa-travel-student',
+    name: 'Bank of America® Travel Rewards for Students',
+    brand: 'Bank of America',
+    metadata: {
+      rewards: { groceries: 1.5, dining: 1.5, travel: 1.5, gas: 1.5, streaming: 1.5, other: 1.5 }
+    }
+  }
+];
+
+const getStorageKey = (userId: string) => `user_cards_${userId}`;
+
 export async function listCards(): Promise<{ data: Card[] | null; error: any }> {
-  const res = await supabase.from('cards').select('*').order('name', { ascending: true });
-  return res as any;
+  // Return static cards
+  return { data: STATIC_CARDS, error: null };
 }
 
 export async function listUserCards(): Promise<{ data: UserCardRow[] | null; error: any }> {
-  // select user_cards with embedded card
-  const res = await supabase.from('user_cards').select('id, card:cards(id, name, brand, metadata, created_at)').order('created_at', { ascending: false });
-  return res as any;
+  try {
+    const user = (await supabase.auth.getUser()).data.user;
+    if (!user) return { data: null, error: { message: 'Not authenticated' } };
+
+    const stored = await AsyncStorage.getItem(getStorageKey(user.id));
+    const cardIds: string[] = stored ? JSON.parse(stored) : [];
+
+    const data: UserCardRow[] = cardIds.map(cardId => ({
+      id: cardId, // Use cardId as id for simplicity
+      card_id: cardId,
+      card: STATIC_CARDS.find(c => c.id === cardId),
+      created_at: new Date().toISOString() // Fake created_at
+    }));
+
+    return { data, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
 }
 
 export async function addUserCard(cardId: string): Promise<{ data: any; error: any }> {
-  // include user_id so RLS checks can validate equality with auth.uid()
-  const user = (await supabase.auth.getUser()).data.user;
-  if (!user) return { data: null, error: { message: 'Not authenticated' } };
-  const payload = { user_id: user.id, card_id: cardId };
-  const res = await supabase.from('user_cards').insert([payload]);
-  return res as any;
+  try {
+    const user = (await supabase.auth.getUser()).data.user;
+    if (!user) return { data: null, error: { message: 'Not authenticated' } };
+
+    const stored = await AsyncStorage.getItem(getStorageKey(user.id));
+    const cardIds: string[] = stored ? JSON.parse(stored) : [];
+
+    if (!cardIds.includes(cardId)) {
+      cardIds.push(cardId);
+      await AsyncStorage.setItem(getStorageKey(user.id), JSON.stringify(cardIds));
+    }
+
+    return { data: null, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
 }
 
 export async function removeUserCard(userCardId: string): Promise<{ data: any; error: any }> {
-  const res = await supabase.from('user_cards').delete().match({ id: userCardId });
-  return res as any;
+  try {
+    const user = (await supabase.auth.getUser()).data.user;
+    if (!user) return { data: null, error: { message: 'Not authenticated' } };
+
+    const stored = await AsyncStorage.getItem(getStorageKey(user.id));
+    const cardIds: string[] = stored ? JSON.parse(stored) : [];
+
+    const updated = cardIds.filter(id => id !== userCardId);
+    await AsyncStorage.setItem(getStorageKey(user.id), JSON.stringify(updated));
+
+    return { data: null, error: null };
+  } catch (e) {
+    return { data: null, error: e };
+  }
 }

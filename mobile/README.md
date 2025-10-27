@@ -51,9 +51,7 @@ Join our community of developers creating universal apps.
 
 ## Project DB assumptions (cards & rewards)
 
-This app expects the following shape for card metadata in the `cards` table:
-
-- `cards` rows contain a JSON/JSONB `metadata` column. The app looks for a `rewards` object inside that metadata, for example:
+The available credit cards are now hardcoded in the frontend (`lib/cards.ts`). The app uses a static list of cards with their reward rates stored in the `metadata.rewards` object, for example:
 
 ```json
 {
@@ -65,7 +63,4 @@ This app expects the following shape for card metadata in the `cards` table:
 }
 ```
 
-- The `user_cards` table maps users to available card records. Use `lib/cards.ts` for the exact queries the app runs.
-- The Purchase screen sorts the user's cards by `metadata.rewards[category]` (higher numeric value = better rewards). Cards with no value for the chosen category are treated as 0.
-
-If you'd rather store reward rates in a dedicated table (e.g. `card_rewards(card_id, category, rate)`), the app logic can be adjusted — tell me and I can add the corresponding queries and migrations.
+User's selected cards are stored locally using AsyncStorage, so no database is required for card management. The Purchase screen sorts the user's cards by `metadata.rewards[category]` (higher numeric value = better rewards). Cards with no value for the chosen category are treated as 0.
