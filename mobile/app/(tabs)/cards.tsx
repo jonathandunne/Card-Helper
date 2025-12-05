@@ -11,9 +11,12 @@ import {
 } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors } from '@/constants/theme';
 import * as CardsLib from '../../lib/cards';
 
 export default function CardsScreen() {
+  const colorScheme = useColorScheme();
   const [cards, setCards] = useState<CardsLib.Card[]>([]);
   const [userCards, setUserCards] = useState<CardsLib.UserCardRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -164,7 +167,14 @@ export default function CardsScreen() {
         renderItem={({ item }) => (
           <TouchableOpacity
             onPress={() => toggleDeleteSelection(item.id)}
-            style={[styles.cardBox, selectedForDelete.has(item.id) && styles.cardBoxSelected]}
+            style={[
+              styles.cardBox,
+              { backgroundColor: Colors[colorScheme ?? 'light'].background, borderColor: Colors[colorScheme ?? 'light'].tabIconDefault },
+              selectedForDelete.has(item.id) && {
+                borderColor: '#FF3333',
+                backgroundColor: colorScheme === 'dark' ? '#4a1a1a' : '#FFE6E6',
+              }
+            ]}
           >
             <View style={styles.checkbox}>
               <ThemedText style={{ fontSize: 24 }}>
@@ -209,8 +219,15 @@ export default function CardsScreen() {
             placeholder="Search cards..."
             value={searchQuery}
             onChangeText={setSearchQuery}
-            style={styles.searchInput}
-            placeholderTextColor="#999"
+            style={[
+              styles.searchInput,
+              {
+                borderColor: Colors[colorScheme ?? 'light'].tabIconDefault,
+                color: Colors[colorScheme ?? 'light'].text,
+                backgroundColor: Colors[colorScheme ?? 'light'].background,
+              }
+            ]}
+            placeholderTextColor={Colors[colorScheme ?? 'light'].tabIconDefault}
           />
 
           <ThemedText style={{ marginBottom: 8 }}>
@@ -223,7 +240,14 @@ export default function CardsScreen() {
             renderItem={({ item }) => (
               <TouchableOpacity
                 onPress={() => toggleCardSelection(item.id)}
-                style={[styles.option, selectedCardIds.has(item.id) && styles.optionSelected]}
+                style={[
+                  styles.option,
+                  { backgroundColor: Colors[colorScheme ?? 'light'].background, borderColor: Colors[colorScheme ?? 'light'].tabIconDefault },
+                  selectedCardIds.has(item.id) && {
+                    borderColor: '#007AFF',
+                    backgroundColor: colorScheme === 'dark' ? '#1a3a5a' : '#E8F0FF',
+                  }
+                ]}
               >
                 <View style={{ flex: 1 }}>
                   <ThemedText>{item.name}</ThemedText>
@@ -263,7 +287,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 2,
     borderColor: '#ddd',
-    backgroundColor: '#f9f9f9',
   },
   cardBoxSelected: {
     borderColor: '#FF3333',
@@ -291,15 +314,13 @@ const styles = StyleSheet.create({
   addBtn: { backgroundColor: '#007AFF', padding: 12, borderRadius: 8, alignItems: 'center' },
   modalContainer: { flex: 1, padding: 20 },
   searchInput: { 
-    borderWidth: 1, 
-    borderColor: '#ddd', 
+    borderWidth: 1,
     padding: 12, 
     borderRadius: 8, 
     marginVertical: 12,
     fontSize: 16,
   },
-  option: { padding: 12, borderWidth: 1, borderColor: '#ddd', borderRadius: 6, marginBottom: 8, flexDirection: 'row', alignItems: 'center' },
-  optionSelected: { borderColor: '#007AFF', backgroundColor: '#E8F0FF' },
+  option: { padding: 12, borderWidth: 1, borderRadius: 6, marginBottom: 8, flexDirection: 'row', alignItems: 'center' },
   saveBtn: { backgroundColor: '#007AFF', padding: 12, borderRadius: 8, alignItems: 'center', flex: 1 },
   cancelBtn: { padding: 12, borderRadius: 8, alignItems: 'center', borderWidth: 1, borderColor: '#ddd', flex: 1 },
   disabled: { opacity: 0.5 },

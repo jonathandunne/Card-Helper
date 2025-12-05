@@ -3,12 +3,16 @@ import { View, StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors } from '@/constants/theme';
 
 export default function HomeScreen() {
+  const colorScheme = useColorScheme();
+
   return (
     <ThemedView style={styles.container}>
       <View style={styles.hero}>
-        <View style={styles.logoWrap}>
+        <View style={[styles.logoWrap, { backgroundColor: colorScheme === 'dark' ? '#0a7ea4' : Colors[colorScheme ?? 'light'].tint }]}>
           <IconSymbol name="creditcard" size={36} color="#fff" />
         </View>
         <View style={{ marginLeft: 12, flex: 1 }}>
@@ -30,5 +34,5 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, paddingTop: 60 },
   hero: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
-  logoWrap: { width: 64, height: 64, borderRadius: 12, backgroundColor: '#00AEEF', alignItems: 'center', justifyContent: 'center' },
+  logoWrap: { width: 64, height: 64, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
 });

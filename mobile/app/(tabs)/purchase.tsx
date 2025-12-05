@@ -77,7 +77,10 @@ export default function PurchaseScreen() {
 
       <TouchableOpacity 
         onPress={() => setDropdownOpen(!dropdownOpen)}
-        style={styles.dropdownButton}
+        style={[
+          styles.dropdownButton,
+          { borderColor: Colors[colorScheme ?? 'light'].tabIconDefault, backgroundColor: Colors[colorScheme ?? 'light'].background }
+        ]}
       >
         <ThemedText style={{ fontSize: 16 }}>
           {CATEGORIES.find(c => c.key === selectedCategory)?.label || 'Select Category'}
@@ -90,7 +93,10 @@ export default function PurchaseScreen() {
       </TouchableOpacity>
 
       {dropdownOpen && (
-        <View style={styles.dropdownMenu}>
+        <View style={[
+          styles.dropdownMenu,
+          { borderColor: Colors[colorScheme ?? 'light'].tabIconDefault, backgroundColor: Colors[colorScheme ?? 'light'].background }
+        ]}>
           <ScrollView scrollEnabled={true} nestedScrollEnabled={true}>
             {CATEGORIES.map((category) => (
               <TouchableOpacity
@@ -99,7 +105,11 @@ export default function PurchaseScreen() {
                   setSelectedCategory(category.key);
                   setDropdownOpen(false);
                 }}
-                style={[styles.dropdownItem, selectedCategory === category.key && styles.dropdownItemSelected]}
+                style={[
+                  styles.dropdownItem,
+                  { borderBottomColor: Colors[colorScheme ?? 'light'].tabIconDefault },
+                  selectedCategory === category.key && { backgroundColor: Colors[colorScheme ?? 'light'].tint + '20' }
+                ]}
               >
                 <ThemedText style={selectedCategory === category.key ? { fontWeight: 'bold', color: '#007AFF' } : undefined}>
                   {category.label}
@@ -142,16 +152,13 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     marginVertical: 12,
   },
   dropdownMenu: {
     borderWidth: 1,
-    borderColor: '#ddd',
     borderRadius: 8,
     marginBottom: 12,
-    backgroundColor: '#f9f9f9',
     height: 200,
     overflow: 'hidden',
   },
@@ -159,7 +166,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   dropdownItemSelected: {
     backgroundColor: '#E8F0FF',
