@@ -28,7 +28,7 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
+  container: { flex: 1, padding: 20, paddingTop: 60 },
   hero: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
   logoWrap: { width: 64, height: 64, borderRadius: 12, backgroundColor: '#00AEEF', alignItems: 'center', justifyContent: 'center' },
 });

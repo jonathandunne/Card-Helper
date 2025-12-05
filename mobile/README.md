@@ -49,18 +49,41 @@ Join our community of developers creating universal apps.
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
 
-## Project DB assumptions (cards & rewards)
+## Project Overview
 
-The available credit cards are now hardcoded in the frontend (`lib/cards.ts`). The app uses a static list of cards with their reward rates stored in the `metadata.rewards` object, for example:
+This is a standalone card rewards management app built with Expo and React Native. The app works completely offline and stores all data locally on your device using AsyncStorage.
 
-```json
-{
-   "rewards": {
-      "groceries": 4.0,
-      "dining": 3.0,
-      "travel": 2.0
-   }
-}
-```
+### Features
+- **Local storage only** - No authentication or internet connection required
+- **5 pre-configured student credit cards** with reward rates
+- **Cards tab** - Add or remove cards from your collection
+- **Purchase tab** - View your cards ranked by rewards for different categories (Groceries, Dining, Travel, Gas, Streaming, Other)
 
-User's selected cards are stored locally using AsyncStorage, so no database is required for card management. The Purchase screen sorts the user's cards by `metadata.rewards[category]` (higher numeric value = better rewards). Cards with no value for the chosen category are treated as 0.
+### Card Data Storage
+
+**Available Cards:**
+- 5 credit cards hardcoded in `lib/cards.ts` with reward percentages for each category
+- Cards stored in memory as static constants
+
+**User's Selected Cards:**
+- Stored locally in AsyncStorage under key `selected_cards`
+- Persists across app restarts
+- No cloud sync - data stays on your device
+
+### Getting Started
+
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+2. Start the app:
+   ```bash
+   npm start
+   ```
+
+3. Open in:
+   - Android emulator: Press `a`
+   - iOS simulator: Press `i`
+   - Web browser: Press `w`
+   - Expo Go app: Scan QR code

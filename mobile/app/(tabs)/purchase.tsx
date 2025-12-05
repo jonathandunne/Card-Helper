@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import React, { useCallback, useMemo, useState } from 'react';
+import { View, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, ScrollView } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import * as CardsLib from '@/lib/cards';
-import { useAuth } from '../../contexts/AuthContext';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors } from '@/constants/theme';
@@ -14,28 +13,31 @@ import { useFocusEffect } from '@react-navigation/native';
 const CATEGORIES = [
   { key: 'groceries', label: 'Groceries' },
   { key: 'dining', label: 'Dining' },
-  { key: 'travel', label: 'Travel' },
   { key: 'gas', label: 'Gas' },
+  { key: 'travel', label: 'Travel' },
+  { key: 'transit', label: 'Transit' },
+  { key: 'drugstores', label: 'Drugstores' },
+  { key: 'onlineShopping', label: 'Online Shopping' },
+  { key: 'entertainment', label: 'Entertainment' },
   { key: 'streaming', label: 'Streaming' },
+  { key: 'wholesale', label: 'Wholesale' },
+  { key: 'wireless', label: 'Wireless' },
+  { key: 'departmentStores', label: 'Department Stores' },
+  { key: 'homeImprovement', label: 'Home Improvement' },
   { key: 'other', label: 'Other' },
 ];
 
 export default function PurchaseScreen() {
   const colorScheme = useColorScheme();
-  const { user, loading: authLoading } = useAuth();
   const [userCards, setUserCards] = useState<CardsLib.UserCardRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('groceries');
-  const [expanded, setExpanded] = useState(true);
-
-  useEffect(() => {
-    if (!authLoading) fetchUserCards();
-  }, [authLoading]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
-      if (!authLoading && user) fetchUserCards();
-    }, [authLoading, user])
+      fetchUserCards();
+    }, [])
   );
 
   async function fetchUserCards() {
@@ -61,7 +63,7 @@ export default function PurchaseScreen() {
       .sort((a, b) => (b.reward ?? 0) - (a.reward ?? 0));
   }, [userCards, selectedCategory]);
 
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <ThemedView style={styles.center}>
         <ActivityIndicator />
@@ -69,66 +71,98 @@ export default function PurchaseScreen() {
     );
   }
 
-  if (!user) {
-    return (
-      <ThemedView style={styles.container}>
-        <ThemedText type="title">Purchases</ThemedText>
-        <ThemedText>Please sign in to view your cards and rewards.</ThemedText>
-      </ThemedView>
-    );
-  }
-
   return (
     <ThemedView style={styles.container}>
-      <ThemedText type="title">Choose category</ThemedText>
+      <ThemedText type="title">Purchase Category</ThemedText>
 
-      <View style={styles.categoriesRow}>
-        {CATEGORIES.map((c) => (
-          <TouchableOpacity
-            key={c.key}
-            onPress={() => setSelectedCategory(c.key)}
-            style={[styles.categoryBtn, selectedCategory === c.key && styles.categorySelected]}
-          >
-            <ThemedText style={selectedCategory === c.key ? { color: '#fff' } : undefined}>{c.label}</ThemedText>
-          </TouchableOpacity>
-        ))}
-      </View>
+      <TouchableOpacity 
+        onPress={() => setDropdownOpen(!dropdownOpen)}
+        style={styles.dropdownButton}
+      >
+        <ThemedText style={{ fontSize: 16 }}>
+          {CATEGORIES.find(c => c.key === selectedCategory)?.label || 'Select Category'}
+        </ThemedText>
+        <IconSymbol 
+          name={dropdownOpen ? 'chevron.up' : 'chevron.down'} 
+          size={18} 
+          color={Colors[colorScheme ?? 'light'].tint} 
+        />
+      </TouchableOpacity>
+
+      {dropdownOpen && (
+        <View style={styles.dropdownMenu}>
+          <ScrollView scrollEnabled={true} nestedScrollEnabled={true}>
+            {CATEGORIES.map((category) => (
+              <TouchableOpacity
+                key={category.key}
+                onPress={() => {
+                  setSelectedCategory(category.key);
+                  setDropdownOpen(false);
+                }}
+                style={[styles.dropdownItem, selectedCategory === category.key && styles.dropdownItemSelected]}
+              >
+                <ThemedText style={selectedCategory === category.key ? { fontWeight: 'bold', color: '#007AFF' } : undefined}>
+                  {category.label}
+                </ThemedText>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
 
       <View style={{ height: 12 }} />
 
       <ThemedText type="subtitle">Your cards (best → worst rewards)</ThemedText>
 
-      <TouchableOpacity onPress={() => setExpanded((s) => !s)} style={styles.dropdownHeader}>
-        <ThemedText>{selectedCategory.toUpperCase()}</ThemedText>
-        <IconSymbol name={expanded ? 'chevron.up' : 'chevron.down'} size={18} color={Colors[colorScheme ?? 'light'].tint} />
-      </TouchableOpacity>
-
-      {expanded && (
-        <FlatList
-          data={sortedByRewards}
-          keyExtractor={(item) => item.id}
-          ListEmptyComponent={() => <ThemedText>No cards available for this category.</ThemedText>}
-          renderItem={({ item }) => (
-            <View style={styles.cardRow}>
-              <View style={{ flex: 1 }}>
-                <ThemedText type="defaultSemiBold">{item.card?.name ?? 'Unknown'}</ThemedText>
-                <ThemedText>{(item.card as any)?.brand ?? ''}</ThemedText>
-              </View>
-              <ThemedText>{(item as any).reward ?? 0}%</ThemedText>
+      <FlatList
+        data={sortedByRewards}
+        keyExtractor={(item) => item.id}
+        ListEmptyComponent={() => <ThemedText>No cards available for this category.</ThemedText>}
+        renderItem={({ item }) => (
+          <View style={styles.cardRow}>
+            <View style={{ flex: 1 }}>
+              <ThemedText type="defaultSemiBold">{item.card?.name ?? 'Unknown'}</ThemedText>
+              <ThemedText>{(item.card as any)?.brand ?? ''}</ThemedText>
             </View>
-          )}
-        />
-      )}
+            <ThemedText style={{ fontWeight: 'bold', fontSize: 16 }}>{(item as any).reward ?? 0}%</ThemedText>
+          </View>
+        )}
+      />
     </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
+  container: { flex: 1, padding: 20, paddingTop: 60 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  categoriesRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 },
-  categoryBtn: { paddingVertical: 8, paddingHorizontal: 12, borderWidth: 1, borderColor: '#ddd', borderRadius: 8, marginRight: 8, marginBottom: 8 },
-  categorySelected: { backgroundColor: '#007AFF', borderColor: '#007AFF' },
-  dropdownHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, borderWidth: 1, borderColor: '#ddd', borderRadius: 8 },
+  dropdownButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    marginVertical: 12,
+  },
+  dropdownMenu: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    marginBottom: 12,
+    backgroundColor: '#f9f9f9',
+    height: 200,
+    overflow: 'hidden',
+  },
+  dropdownItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  dropdownItemSelected: {
+    backgroundColor: '#E8F0FF',
+  },
   cardRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, borderBottomWidth: 1, borderColor: '#eee' },
 });
