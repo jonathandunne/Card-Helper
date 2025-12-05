@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
   },
   removeBtn: { padding: 8 },
   addBtn: { backgroundColor: '#007AFF', padding: 12, borderRadius: 8, alignItems: 'center' },
-  modalContainer: { flex: 1, padding: 20 },
+  modalContainer: { flex: 1, padding: 20, paddingTop: 60 },
   searchInput: { 
     borderWidth: 1,
     padding: 12, 
